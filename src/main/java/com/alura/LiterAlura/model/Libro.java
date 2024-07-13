@@ -12,8 +12,7 @@ public class Libro {
     private String titulo;
     @ManyToOne(cascade = CascadeType.ALL)
     private Autor autor;
-    @Enumerated(EnumType.STRING)
-    private Idioma idioma;
+    private String idioma;
     private int noDescargas;
 
     public Libro(){}
@@ -21,7 +20,7 @@ public class Libro {
     public Libro(DatosLibro datosLibro) {
         this.titulo = datosLibro.titulo();
         this.autor = new Autor(datosLibro.autores().get(0));
-        this.idioma = Idioma.desdeCodigo(datosLibro.idiomas().get(0));
+        this.idioma = datosLibro.idiomas().get(0);
         this.noDescargas = datosLibro.noDescargas();
     }
 
@@ -61,11 +60,11 @@ public class Libro {
         this.autor = autor;
     }
 
-    public Idioma getIdioma() {
+    public String getIdioma() {
         return idioma;
     }
 
-    public void setIdioma(Idioma idioma) {
+    public void setIdioma(String idioma) {
         this.idioma = idioma;
     }
 

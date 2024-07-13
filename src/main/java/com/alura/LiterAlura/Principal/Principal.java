@@ -59,6 +59,9 @@ public class Principal {
                 case 4:
                     autoresPorAnio();
                     break;
+                case 5:
+                    librosPorGenero();
+                    break;
                 case 0:
                     System.out.println("Cerrando la aplicación...");
                     break;
@@ -111,5 +114,21 @@ public class Principal {
         Integer anio = Integer.valueOf(teclado.nextLine());
         autores = autorRepository.autoresPorFecha(anio);
         autores.forEach(System.out::println);
+    }
+
+    private void librosPorGenero() {
+        List<String> idiomas = libroRepository.listaDeIdiomas();
+        String idiomaSeleccionado;
+
+        do {
+            System.out.println("Idiomas disponibles:");
+            idiomas.forEach(System.out::println);
+            System.out.print("Seleccione uno de los idiomas registrados: ");
+            idiomaSeleccionado = teclado.nextLine().toLowerCase();
+        } while(!idiomas.contains(idiomaSeleccionado));
+
+        List<Libro> libros = libroRepository.findByIdiomaIgnoreCase(idiomaSeleccionado);
+        System.out.println("Libros en idioma '" + idiomaSeleccionado + "':");
+        libros.forEach(System.out::println);
     }
 }
