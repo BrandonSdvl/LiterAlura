@@ -1,12 +1,16 @@
 package com.alura.LiterAlura.Principal;
 
+import com.alura.LiterAlura.model.Autor;
 import com.alura.LiterAlura.model.DatosLibro;
 import com.alura.LiterAlura.model.Libro;
+import com.alura.LiterAlura.repository.AutorRepository;
 import com.alura.LiterAlura.repository.LibroRepository;
 import com.alura.LiterAlura.service.ConsumoAPI;
 import com.alura.LiterAlura.service.ConvierteDatos;
 import com.fasterxml.jackson.databind.JsonNode;
 
+import java.util.Comparator;
+import java.util.List;
 import java.util.Scanner;
 
 public class Principal {
@@ -14,10 +18,12 @@ public class Principal {
     private final String URL_BASE = "https://gutendex.com";
     private Scanner teclado = new Scanner(System.in);
     private ConvierteDatos conversor = new ConvierteDatos();
-    private LibroRepository repository;
+    private LibroRepository libroRepository;
+    private AutorRepository autorRepository;
 
-    public Principal(LibroRepository repository) {
-        this.repository = repository;
+    public Principal(LibroRepository libroRepository, AutorRepository autorRepository) {
+        this.libroRepository = libroRepository;
+        this.autorRepository = autorRepository;
     }
 
     public void mostrarMenu() {
@@ -44,6 +50,12 @@ public class Principal {
                 case 1:
                     buscarPorTitulo();
                     break;
+                case 2:
+                    listarLibros();
+                    break;
+                case 3:
+                    listarAutores();
+                    break;
                 case 0:
                     System.out.println("Cerrando la aplicación...");
                     break;
@@ -67,9 +79,26 @@ public class Principal {
 
             Libro libro = new Libro(datosLibro);
             System.out.println(libro);
-            repository.save(libro);
+            libroRepository.save(libro);
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    private void listarLibros() {
+        List<Libro> libros;
+        libros = libroRepository.findAll();
+
+        libros.stream()
+                .sorted(Comparator.comparing(Libro::getTitulo))
+                .forEach(System.out::println);
+    }
+
+    private void listarAutores() {
+        List<Autor> autores;
+        autores = autorRepository.findAll();
+        autores.stream()
+                .sorted(Comparator.comparing(Autor::getNombre))
+                .forEach(System.out::println);
     }
 }
