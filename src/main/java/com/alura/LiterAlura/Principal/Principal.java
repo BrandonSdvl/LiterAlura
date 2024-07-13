@@ -56,6 +56,9 @@ public class Principal {
                 case 3:
                     listarAutores();
                     break;
+                case 4:
+                    autoresPorAnio();
+                    break;
                 case 0:
                     System.out.println("Cerrando la aplicación...");
                     break;
@@ -100,5 +103,13 @@ public class Principal {
         autores.stream()
                 .sorted(Comparator.comparing(Autor::getNombre))
                 .forEach(System.out::println);
+    }
+
+    private void autoresPorAnio() {
+        List<Autor> autores;
+        System.out.print("Ingrese el año a buscar: ");
+        Integer anio = Integer.valueOf(teclado.nextLine());
+        autores = autorRepository.autoresPorFecha(anio);
+        autores.forEach(System.out::println);
     }
 }
