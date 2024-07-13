@@ -1,6 +1,8 @@
 package com.alura.LiterAlura.Principal;
 
 import com.alura.LiterAlura.model.DatosLibro;
+import com.alura.LiterAlura.model.Libro;
+import com.alura.LiterAlura.repository.LibroRepository;
 import com.alura.LiterAlura.service.ConsumoAPI;
 import com.alura.LiterAlura.service.ConvierteDatos;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -12,6 +14,11 @@ public class Principal {
     private final String URL_BASE = "https://gutendex.com";
     private Scanner teclado = new Scanner(System.in);
     private ConvierteDatos conversor = new ConvierteDatos();
+    private LibroRepository repository;
+
+    public Principal(LibroRepository repository) {
+        this.repository = repository;
+    }
 
     public void mostrarMenu() {
         var opcion = -1;
@@ -23,7 +30,6 @@ public class Principal {
                 3.- Listar autores registrados
                 4.- Listar autores vivos en un determinado año
                 5.- Listar libros por idioma
-                6.- Listar libros por idioma
                 0.- Salir
                 
                 Seleccione una opción:\s""";
@@ -49,9 +55,9 @@ public class Principal {
 
     private void buscarPorTitulo() {
         System.out.print("Ingrese el nombre del libro que desea buscar: ");
-        String libro = teclado.nextLine();
+        String busqueda = teclado.nextLine();
 
-        var json = consumoApi.obtenerDatos(URL_BASE + "/books/?search=" + libro.replace(" ", "%20"));
+        var json = consumoApi.obtenerDatos(URL_BASE + "/books/?search=" + busqueda.replace(" ", "%20"));
 
         try {
             JsonNode rootNode = conversor.obtenerDatos(json, JsonNode.class);
@@ -59,7 +65,9 @@ public class Principal {
 
             DatosLibro datosLibro = conversor.obtenerDatos(resultsNode.get(0).toString(), DatosLibro.class);
 
-            System.out.println(datosLibro);
+            Libro libro = new Libro(datosLibro);
+            System.out.println(libro);
+            repository.save(libro);
         } catch (Exception e) {
             e.printStackTrace();
         }
