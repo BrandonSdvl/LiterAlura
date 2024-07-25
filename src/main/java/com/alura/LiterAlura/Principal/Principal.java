@@ -60,7 +60,7 @@ public class Principal {
                     autoresPorAnio();
                     break;
                 case 5:
-                    librosPorGenero();
+                    librosPorIdioma();
                     break;
                 case 0:
                     System.out.println("Cerrando la aplicación...");
@@ -81,19 +81,29 @@ public class Principal {
             JsonNode rootNode = conversor.obtenerDatos(json, JsonNode.class);
             JsonNode resultsNode = rootNode.get("results");
 
+            if(resultsNode.isEmpty()) {
+                System.out.println("Libro no encontrado...\n");
+                return;
+            }
+
             DatosLibro datosLibro = conversor.obtenerDatos(resultsNode.get(0).toString(), DatosLibro.class);
 
             Libro libro = new Libro(datosLibro);
             System.out.println(libro);
             libroRepository.save(libro);
         } catch (Exception e) {
-            e.printStackTrace();
+            System.err.println("Error al buscar libro: " + e.getMessage());
         }
     }
 
     private void listarLibros() {
         List<Libro> libros;
         libros = libroRepository.findAll();
+
+        if(libros.isEmpty()) {
+            System.out.println("Aún no se ha registrado ningún libro...\n");
+            return;
+        }
 
         libros.stream()
                 .sorted(Comparator.comparing(Libro::getTitulo))
@@ -103,6 +113,10 @@ public class Principal {
     private void listarAutores() {
         List<Autor> autores;
         autores = autorRepository.findAll();
+        if(autores.isEmpty()) {
+            System.out.println("Aún no se ha registrado ningún autor...\n");
+            return;
+        }
         autores.stream()
                 .sorted(Comparator.comparing(Autor::getNombre))
                 .forEach(System.out::println);
@@ -110,15 +124,35 @@ public class Principal {
 
     private void autoresPorAnio() {
         List<Autor> autores;
-        System.out.print("Ingrese el año a buscar: ");
-        Integer anio = Integer.valueOf(teclado.nextLine());
+        int anio;
+
+        while (true) {
+            System.out.print("Ingrese el año a buscar: ");
+            try {
+                anio = Integer.parseInt(teclado.nextLine());
+                break;
+            } catch (NumberFormatException e) {
+                System.out.println("Ingrese un valor numérico válido.");
+            }
+        }
+
         autores = autorRepository.autoresPorFecha(anio);
-        autores.forEach(System.out::println);
+
+        if(autores.isEmpty()) {
+            System.out.println("No se ha encontrado ningún autor...\n");
+        } else {
+            autores.forEach(System.out::println);
+        }
     }
 
-    private void librosPorGenero() {
+    private void librosPorIdioma() {
         List<String> idiomas = libroRepository.listaDeIdiomas();
         String idiomaSeleccionado;
+
+        if(idiomas.isEmpty()) {
+            System.out.println("Aun no hay libros registrados...");
+            return;
+        }
 
         do {
             System.out.println("Idiomas disponibles:");
