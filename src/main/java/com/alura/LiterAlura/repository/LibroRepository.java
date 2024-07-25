@@ -11,4 +11,6 @@ public interface LibroRepository extends JpaRepository<Libro,Long> {
     List<String> listaDeIdiomas();
 
     List<Libro> findByIdiomaIgnoreCase(String idioma);
+
+    Libro findByTitulo(String titulo);
 }

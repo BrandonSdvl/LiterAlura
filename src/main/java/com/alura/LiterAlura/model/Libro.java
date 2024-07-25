@@ -10,16 +10,16 @@ public class Libro {
     private Long id;
     @Column(unique = true)
     private String titulo;
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne
     private Autor autor;
     private String idioma;
     private int noDescargas;
 
     public Libro(){}
 
-    public Libro(DatosLibro datosLibro) {
+    public Libro(DatosLibro datosLibro, Autor autor) {
         this.titulo = datosLibro.titulo();
-        this.autor = new Autor(datosLibro.autores().get(0));
+        this.autor = autor;
         this.idioma = datosLibro.idiomas().get(0);
         this.noDescargas = datosLibro.noDescargas();
     }

@@ -1,6 +1,7 @@
 package com.alura.LiterAlura.Principal;
 
 import com.alura.LiterAlura.model.Autor;
+import com.alura.LiterAlura.model.DatosAutor;
 import com.alura.LiterAlura.model.DatosLibro;
 import com.alura.LiterAlura.model.Libro;
 import com.alura.LiterAlura.repository.AutorRepository;
@@ -11,6 +12,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import java.util.Scanner;
 
 public class Principal {
@@ -27,7 +29,7 @@ public class Principal {
     }
 
     public void mostrarMenu() {
-        var opcion = -1;
+        String opcion = "";
         String menu = """
                 Bienvenido/a a LiterAlura
                 
@@ -40,29 +42,28 @@ public class Principal {
                 
                 Seleccione una opción:\s""";
 
-        while(opcion != 0) {
+        while(!opcion.equals("0")) {
             System.out.print(menu);
 
-            opcion = teclado.nextInt();
-            teclado.nextLine();
+            opcion = teclado.nextLine();
 
             switch (opcion) {
-                case 1:
+                case "1":
                     buscarPorTitulo();
                     break;
-                case 2:
+                case "2":
                     listarLibros();
                     break;
-                case 3:
+                case "3":
                     listarAutores();
                     break;
-                case 4:
+                case "4":
                     autoresPorAnio();
                     break;
-                case 5:
+                case "5":
                     librosPorIdioma();
                     break;
-                case 0:
+                case "0":
                     System.out.println("Cerrando la aplicación...");
                     break;
                 default:
@@ -81,19 +82,44 @@ public class Principal {
             JsonNode rootNode = conversor.obtenerDatos(json, JsonNode.class);
             JsonNode resultsNode = rootNode.get("results");
 
-            if(resultsNode.isEmpty()) {
+            if(resultsNode == null || resultsNode.isEmpty()) {
                 System.out.println("Libro no encontrado...\n");
                 return;
             }
 
             DatosLibro datosLibro = conversor.obtenerDatos(resultsNode.get(0).toString(), DatosLibro.class);
+            DatosAutor datosAutor = obtenerDatosAutor(datosLibro);
 
-            Libro libro = new Libro(datosLibro);
-            System.out.println(libro);
-            libroRepository.save(libro);
+            Libro tmpLibro = libroRepository.findByTitulo(datosLibro.titulo());
+
+            if(tmpLibro != null){
+                System.out.println("Este libro ya ha sido registrado...\n");
+                System.out.println(tmpLibro);
+            } else {
+                Autor autor = obtenerORegistrarAutor(datosAutor);
+                Libro libro = new Libro(datosLibro, autor);
+                libroRepository.save(libro);
+                System.out.println(libro);
+            }
         } catch (Exception e) {
             System.err.println("Error al buscar libro: " + e.getMessage());
         }
+    }
+
+    private Autor obtenerORegistrarAutor(DatosAutor datosAutor) {
+        return Optional.ofNullable(autorRepository.findByNombre(datosAutor.nombre()))
+                .orElseGet(() -> {
+                    Autor autor = new Autor(datosAutor);
+                    autorRepository.save(autor);
+                    return autor;
+                });
+    }
+
+    private DatosAutor obtenerDatosAutor(DatosLibro datosLibro) {
+        return Optional.ofNullable(datosLibro.autores())
+                .filter(autores -> !autores.isEmpty())
+                .map(autores -> autores.get(0))
+                .orElse(new DatosAutor("Desconocido", null, null));
     }
 
     private void listarLibros() {

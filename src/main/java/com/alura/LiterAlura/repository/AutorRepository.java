@@ -10,4 +10,6 @@ import java.util.List;
 public interface AutorRepository extends JpaRepository<Autor, Long> {
     @Query("SELECT a FROM Autor a WHERE a.fechaNacimiento < :fecha AND a.fechaFallecimiento > :fecha")
     List<Autor> autoresPorFecha(@Param("fecha") Integer fecha);
+
+    Autor findByNombre(String nombre);
 }
